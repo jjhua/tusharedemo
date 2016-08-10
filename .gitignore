@@ -87,3 +87,12 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+output/
+.gitignore~
+*~
+*.o
+.deps/
+autom4te.cache/
+.libs/
+
