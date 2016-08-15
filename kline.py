@@ -6,13 +6,19 @@ Created on Fri Aug 12 19:25:35 2016
 """
 
 import matplotlib.pyplot as plt
-  
+import matplotlib as mpl
+
 from matplotlib.dates import DateFormatter, WeekdayLocator, DayLocator, MONDAY,YEARLY
 from matplotlib.finance import quotes_historical_yahoo_ohlc, candlestick_ohlc
+
+
+zhfont = mpl.font_manager.FontProperties(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf')
   
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus'] = False
-  
+#plt.rcParams['font.sans-serif'] = [zhfont]
+#plt.rcParams['axes.unicode_minus'] = False
+
+
+
 ticker = '600028' # 600028 是"中国石化"的股票代码
 ticker += '.ss'   # .ss 表示上证 .sz表示深证
   
@@ -46,6 +52,6 @@ ax.autoscale_view()
 plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
   
 ax.grid(True)
-plt.title('中国石化 600028')
+plt.title(u'中国石化 600028', fontproperties=zhfont)
 plt.show()
 
