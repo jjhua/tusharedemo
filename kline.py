@@ -12,7 +12,7 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, DayLocator, MONDAY,Y
 from matplotlib.finance import quotes_historical_yahoo_ohlc, candlestick_ohlc
 
 
-zhfont = mpl.font_manager.FontProperties(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf')
+#zhfont = mpl.font_manager.FontProperties(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf')
   
 #plt.rcParams['font.sans-serif'] = [zhfont]
 #plt.rcParams['axes.unicode_minus'] = False
@@ -52,6 +52,6 @@ ax.autoscale_view()
 plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
   
 ax.grid(True)
-plt.title(u'中国石化 600028', fontproperties=zhfont)
+plt.title(u'中国石化 600028')
 plt.show()
 

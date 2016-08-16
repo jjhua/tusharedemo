@@ -17,7 +17,7 @@ from matplotlib.lines import Line2D, TICKLEFT, TICKRIGHT
 from matplotlib.patches import Rectangle
 from matplotlib.dates import date2num
 
-zhfont = mpl.font_manager.FontProperties(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf')
+#zhfont = mpl.font_manager.FontProperties(fname='/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf')
 
 begin_time = '2015-08-01'
 end_time = '2015-11-01'
@@ -35,11 +35,7 @@ def _candlestick(ax, df, width=0.2, colorup='k', colordown='r',
     ----------
     ax : `Axes`
         an Axes instance to plot to
-    quotes : sequence of quote sequences
-        data to plot.  time must be in float date format - see date2num
-        (time, open, high, low, close, ...) vs
-        (time, open, close, high, low, ...)
-        set by `ochl`
+    df : pandas data from tushare
     width : float
         fraction of a day for the rectangle width
     colorup : color
@@ -122,7 +118,7 @@ def drawPic(df, code, name):
 
     
     ax.grid(True)
-    plt.title(name + '  ' + code, fontproperties=zhfont)
+    plt.title(name + '  ' + code)
     plt.show()
 
 
