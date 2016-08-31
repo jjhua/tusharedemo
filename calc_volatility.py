@@ -35,20 +35,20 @@ def calcOne(code, timeToMarket):
     df = ts.get_h_data(str(code).zfill(6), autype=None)    #不复权
     df,vol_mean = calcOneVolatility(df)
     df.to_csv('output/vol' + str(code).zfill(6) + '.csv')
-    fig = plt.figure();
 
-    fig.autofmt_xdate(bottom=0.2, rotation=30, ha='right')
-    ax = df['volatility'].plot(kind='bar', title=code)
-    xlabels = []
-    last_month = 0
-    for item in df.index.tolist():
-        if item.month == last_month:
-            xlabels.append('')
-        else:
-            last_month = item.month
-            xlabels.append(item.strftime('%Y-%m'))
-    ax.set_xticklabels(xlabels)
-    ax.grid(axis='y')
+#    fig = plt.figure();
+#    fig.autofmt_xdate(bottom=0.2, rotation=30, ha='right')
+#    ax = df['volatility'].plot(kind='bar', title=code)
+#    xlabels = []
+#    last_month = 0
+#    for item in df.index.tolist():
+#        if item.month == last_month:
+#            xlabels.append('')
+#        else:
+#            last_month = item.month
+#            xlabels.append(item.strftime('%Y-%m'))
+#    ax.set_xticklabels(xlabels)
+#    ax.grid(axis='y')
     return vol_mean
 
 
@@ -60,7 +60,12 @@ for index,row in all_stock.iterrows():
     timeToMarket = row['timeToMarket']
     print index
     print code , "=" , name, '  time=' + str(timeToMarket)
-    vol_mean = calcOne(code, timeToMarket)
-    all_stock.loc[index, 'vol_mean'] = vol_mean;
+    try:
+        vol_mean = calcOne(code, timeToMarket)
+        all_stock.loc[index, 'vol_mean'] = vol_mean;
+        if index % 100 == 99:
+            all_stock.to_csv('output/vol_mean.csv')
+    except:
+        print 'error'
 
 all_stock.to_csv('output/vol_mean.csv')
