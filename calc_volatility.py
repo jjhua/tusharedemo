@@ -13,6 +13,17 @@ from matplotlib.dates import DateFormatter, WeekdayLocator, DayLocator, MONDAY,Y
 
 all_stock = pd.read_csv('all.csv')
 
+def getStockData(code):
+    filename = 'output/vol' + str(code).zfill(6) + '.csv'
+    try:
+        df = pd.read_csv(filename)
+        if not df.empty:
+            return df
+    except:
+        pass
+
+    df = ts.get_h_data(str(code).zfill(6), autype=None)    #不复权
+    return df
 
 def calcOneVolatility(df):
     last = 0
@@ -32,8 +43,9 @@ def calcOneVolatility(df):
 def calcOne(code, timeToMarket):
 #    ts.get_h_data(str(code))    #前复权
 #    ts.get_h_data(str(code), autype='hfq')    #后复权
+    df = getStockData(code)
     filename = 'output/vol' + str(code).zfill(6) + '.csv'
-    df = ts.get_h_data(str(code).zfill(6), autype=None)    #不复权
+#    df = ts.get_h_data(str(code).zfill(6), autype=None)    #不复权
     df,vol_mean = calcOneVolatility(df)
     df.to_csv(filename)
 
@@ -66,7 +78,7 @@ for index,row in all_stock.iterrows():
         all_stock.loc[index, 'vol_mean'] = vol_mean;
         if index % 100 == 99:
             all_stock.to_csv('output/vol_mean.csv')
-    except:
-        print 'error'
+    except Exception as e:
+        print 'except:', e
 
 all_stock.to_csv('output/vol_mean.csv')
