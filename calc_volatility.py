@@ -32,9 +32,10 @@ def calcOneVolatility(df):
 def calcOne(code, timeToMarket):
 #    ts.get_h_data(str(code))    #前复权
 #    ts.get_h_data(str(code), autype='hfq')    #后复权
+    filename = 'output/vol' + str(code).zfill(6) + '.csv'
     df = ts.get_h_data(str(code).zfill(6), autype=None)    #不复权
     df,vol_mean = calcOneVolatility(df)
-    df.to_csv('output/vol' + str(code).zfill(6) + '.csv')
+    df.to_csv(filename)
 
 #    fig = plt.figure();
 #    fig.autofmt_xdate(bottom=0.2, rotation=30, ha='right')
