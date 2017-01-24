@@ -26,11 +26,16 @@ begin_time = '2010-01-01'
 
 
 def check_stock(code, name):
-    print name
+#    print name
+    success_count = 0
+    failed_count = 0
+    
     df = ts.get_hist_data(code, start=begin_time)
     df = df.sort_index(0)
     dflen = df.shape[0]
     if dflen>35:
+        last_operator_price_close = 0
+        last_operator = 0
         df['macd_DIFF_DEA'] = pd.Series()
         df['macd_DEA_K'] = pd.Series()
         df['macd_MACD_SELF'] = pd.Series()
@@ -80,21 +85,58 @@ def check_stock(code, name):
                 for i in range(1,26):
                     if curdf.iat[(dflen-1-i),15]<=0:#
                         operate = operate + 5
-                        df['macd_MACD_SELF'][dflen] = 1
+                        df['macd_MACD_SELF'][dflen - 1] = 1
                         break
                     #由正变负，卖出信号   
             if curdf.iat[(dflen-1),15]<0 and dflen >30 :
                 for i in range(1,26):
                     if curdf.iat[(dflen-1-i),15]>=0:#
                         operate = operate - 5
-                        df['macd_MACD_SELF'][dflen] = -1
+                        df['macd_MACD_SELF'][dflen - 1] = -1
                         break
                     
-            df['macd_SUM'][dflen] = operate
+            df['macd_SUM'][dflen - 1] = operate
             
-    
-    df.to_csv('./output/macd/' + code + '.csv')
-    
-check_stock('600028', u'')
+            if operate == 0:
+                continue
+            cur_operator_price_close = curdf['close'][dflen - 1]
+            print code, name, 'operate=', operate, '  last_operator=', last_operator,
+            print '   cur_operator_price_close=', cur_operator_price_close,
+            print '   last_operator_price_close=', last_operator_price_close
+            if last_operator == operate:
+                continue
+            if operate > 0:
+                print 'operate=买入 price=',cur_operator_price_close
+            else:
+                print 'operate=卖出 ',
+                print '   success=', (cur_operator_price_close > last_operator_price_close)
+                print '   curprice=',cur_operator_price_close,
+                print '   last_operator_price_close=', last_operator_price_close
+                if last_operator_price_close == 0:
+                    continue
+                if cur_operator_price_close > last_operator_price_close:
+                    success_count += 1
+                else:
+                    failed_count += 1
+                
+            last_operator = operate
+            last_operator_price_close = cur_operator_price_close
 
-print 'finish'
+
+
+    df.to_csv('./output/macd/' + code + '.csv')
+    return (success_count,failed_count)
+
+if __name__ == '__main__':    
+
+    all_stock = pd.read_csv('vol_mean.csv')
+    for index,row in all_stock.iterrows():
+        code = row['code']
+        name = row['name']
+        code_str = str(code).zfill(6)
+#        print code_str, '=', name
+        success_count,failed_count = check_stock(code_str, name)
+        print success_count,failed_count
+
+    
+    print 'finish'
