@@ -100,18 +100,19 @@ def check_stock(code, name):
             if operate == 0:
                 continue
             cur_operator_price_close = curdf['close'][dflen - 1]
-            print code, name, 'operate=', operate, '  last_operator=', last_operator,
-            print '   cur_operator_price_close=', cur_operator_price_close,
-            print '   last_operator_price_close=', last_operator_price_close
+#            print code, name, 'operate=', operate, '  last_operator=', last_operator,
+#            print '   cur_operator_price_close=', cur_operator_price_close,
+#            print '   last_operator_price_close=', last_operator_price_close
             if last_operator == operate:
                 continue
             if operate > 0:
-                print 'operate=买入 price=',cur_operator_price_close
+#                print 'operate=买入 price=',cur_operator_price_close
+                pass
             else:
-                print 'operate=卖出 ',
-                print '   success=', (cur_operator_price_close > last_operator_price_close)
-                print '   curprice=',cur_operator_price_close,
-                print '   last_operator_price_close=', last_operator_price_close
+#                print 'operate=卖出 ',
+#                print '   success=', (cur_operator_price_close > last_operator_price_close)
+#                print '   curprice=',cur_operator_price_close,
+#                print '   last_operator_price_close=', last_operator_price_close
                 if last_operator_price_close == 0:
                     continue
                 if cur_operator_price_close > last_operator_price_close:
@@ -136,7 +137,7 @@ if __name__ == '__main__':
         code_str = str(code).zfill(6)
 #        print code_str, '=', name
         success_count,failed_count = check_stock(code_str, name)
-        print success_count,failed_count
+        print code, name, '  success_count=', success_count,'  failed_count=', failed_count
 
     
     print 'finish'
