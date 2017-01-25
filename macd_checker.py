@@ -131,13 +131,18 @@ def check_stock(code, name):
 if __name__ == '__main__':    
 
     all_stock = pd.read_csv('vol_mean.csv')
+    all_stock['macd_success'] = pd.Series()
+    all_stock['macd_fail'] = pd.Series()
     for index,row in all_stock.iterrows():
         code = row['code']
         name = row['name']
         code_str = str(code).zfill(6)
 #        print code_str, '=', name
         success_count,failed_count = check_stock(code_str, name)
-        print code, name, '  success_count=', success_count,'  failed_count=', failed_count
+        all_stock.loc[index, 'macd_success'] = success_count
+        all_stock.loc[index, 'macd_fail'] = failed_count
+        if (success_count > failed_count) and (success_count > 5) and (failed_count == 0):
+            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
 
-    
+    all_stock.to_csv('./output/macd/summy.csv')
     print 'finish'
