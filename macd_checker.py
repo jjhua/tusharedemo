@@ -229,7 +229,7 @@ def checknow():
             print code_str, name, '  operate=', operate,
             print '  success_count=', success_count,'  failed_count=', failed_count
             
-    macddata = all_stock[all_stock.operate > 0].sort('macd_success', 0, False)
+    macddata = all_stock[all_stock.operate > 0].sort_values('macd_success', 0, False)
     macddata.to_csv('./output/macd/day/' + datetime.date.today().strftime('%Y-%m-%d') + '.csv')
 
 if __name__ == '__main__':    
