@@ -22,7 +22,7 @@ from matplotlib.patches import Rectangle
 from matplotlib.dates import date2num
 
 begin_time = '2010-01-01'
-
+begin_time_check_now = '2016-01-01'
 
 def check_stock(code, name):
 #    print name
@@ -39,6 +39,7 @@ def check_stock(code, name):
         df['macd_DEA_K'] = pd.Series()
         df['macd_MACD_SELF'] = pd.Series()
         df['macd_SUM'] = pd.Series()
+        df['macd_result'] = pd.Series()
         for dflen in range(36, df.shape[0] + 1):
             curdf = pd.DataFrame(df[:dflen])
             macd, macdsignal, macdhist = ta.MACD(np.array(curdf['close']), fastperiod=12, slowperiod=26, signalperiod=9)
@@ -94,16 +95,17 @@ def check_stock(code, name):
                         df['macd_MACD_SELF'][dflen - 1] = -1
                         break
                     
-            df['macd_SUM'][dflen - 1] = operate
+            if operate != 0:
+                df['macd_SUM'][dflen - 1] = operate
             
             if operate == 0:
                 continue
             cur_operator_price_close = curdf['close'][dflen - 1]
+            if last_operator * operate > 0:
+                continue
 #            print code, name, 'operate=', operate, '  last_operator=', last_operator,
 #            print '   cur_operator_price_close=', cur_operator_price_close,
 #            print '   last_operator_price_close=', last_operator_price_close
-            if last_operator == operate:
-                continue
             if operate > 0:
 #                print 'operate=买入 price=',cur_operator_price_close
                 pass
@@ -112,12 +114,13 @@ def check_stock(code, name):
 #                print '   success=', (cur_operator_price_close > last_operator_price_close)
 #                print '   curprice=',cur_operator_price_close,
 #                print '   last_operator_price_close=', last_operator_price_close
-                if last_operator_price_close == 0:
-                    continue
-                if cur_operator_price_close > last_operator_price_close:
-                    success_count += 1
-                else:
-                    failed_count += 1
+                if last_operator_price_close != 0:
+                    if cur_operator_price_close > last_operator_price_close:
+                        success_count += 1
+                        df['macd_result'][dflen - 1] = 1
+                    else:
+                        failed_count += 1
+                        df['macd_result'][dflen - 1] = -1
                 
             last_operator = operate
             last_operator_price_close = cur_operator_price_close
@@ -136,7 +139,7 @@ def checkAll():
         code = row['code']
         name = row['name']
         code_str = str(code).zfill(6)
-#        print code_str, '=', name
+        print code_str, '=', name
         success_count,failed_count = check_stock(code_str, name)
         all_stock.loc[index, 'macd_success'] = success_count
         all_stock.loc[index, 'macd_fail'] = failed_count
@@ -149,7 +152,7 @@ def check_stock_now(code, name):
     operate = 0
         
     
-    df = ts.get_hist_data(code, start=begin_time)
+    df = ts.get_hist_data(code, start=begin_time_check_now)
     df = df.sort_index(0)
     dflen = df.shape[0]
     if dflen>35:
@@ -232,7 +235,18 @@ def checknow():
     macddata = all_stock[all_stock.operate > 0].sort_values('macd_success', 0, False)
     macddata.to_csv('./output/macd/day/' + datetime.date.today().strftime('%Y-%m-%d') + '.csv')
 
+def checkSome():
+    codes = [
+            300218
+    ]
+    for code in codes:
+        code_str = str(code).zfill(6)
+        print code_str
+        check_stock(code_str, 'test')
+
 if __name__ == '__main__':    
     checknow()
-#    check_stock('000718', 'dd')
+#    checkAll()
+#    checkSome()
+#    check_stock('600800', 'test')
     print 'finish'
