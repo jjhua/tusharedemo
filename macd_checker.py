@@ -29,10 +29,13 @@ def check_stock(code, name):
     success_count = 0
     failed_count = 0
     
-    while True:
+    for i in range(0, 10):
         df = ts.get_hist_data(code, start=begin_time)
-        if len(df) > 0:
+        if df is not None:
             break
+        print 'retry ', i, code, name
+    if df is None:
+        return (0, 0)
     df = df.sort_index(0)
     dflen = df.shape[0]
     if dflen>35:
