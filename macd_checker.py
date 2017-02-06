@@ -21,6 +21,9 @@ from matplotlib.lines import Line2D, TICKLEFT, TICKRIGHT
 from matplotlib.patches import Rectangle
 from matplotlib.dates import date2num
 
+from multiprocessing import Pool
+
+THREAD_POOL_SIZE = 8
 begin_time = '2010-01-01'
 begin_time_check_now = '2016-01-01'
 
@@ -86,11 +89,11 @@ def check_stock(code, name):
             #3.DEA线与K线发生背离，行情反转信号。
             if curdf.iat[(dflen-1),7]>=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]>=curdf.iat[(dflen-1),9]:#K线上涨
                 if SignalMA5[MAlen-1]<=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]<=SignalMA20[MAlen-1]: #DEA下降
-                    operate = operate - 1
+#                    operate = operate - 1
                     df['macd_DEA_K'][dflen - 1] = 1
             elif curdf.iat[(dflen-1),7]<=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]<=curdf.iat[(dflen-1),9]:#K线下降
                 if SignalMA5[MAlen-1]>=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]>=SignalMA20[MAlen-1]: #DEA上涨
-                    operate = operate + 1
+#                    operate = operate + 1
                     df['macd_DEA_K'][dflen - 1] = -1
                        
                
@@ -98,14 +101,14 @@ def check_stock(code, name):
             if curdf.iat[(dflen-1),macdhist_index]>0 and dflen >30 :
                 for i in range(1,26):
                     if curdf.iat[(dflen-1-i),macdhist_index]<=0:#
-                        operate = operate + 5
+#                        operate = operate + 5
                         df['macd_MACD_SELF'][dflen - 1] = 1
                         break
                     #由正变负，卖出信号   
             if curdf.iat[(dflen-1),macdhist_index]<0 and dflen >30 :
                 for i in range(1,26):
                     if curdf.iat[(dflen-1-i),macdhist_index]>=0:#
-                        operate = operate - 5
+#                        operate = operate - 5
                         df['macd_MACD_SELF'][dflen - 1] = -1
                         break
                     
@@ -144,25 +147,50 @@ def check_stock(code, name):
 
     df.to_csv('./output/macd/' + code + '.csv')
     return (success_count,failed_count)
+
+def checkStockInThread((index,row)):
+#    print index
+#    print row
+    code = row['code']
+    name = row['name']
+    code_str = str(code).zfill(6)
+#    print code_str, '=', name
+    success_count,failed_count = check_stock(code_str, name)
     
+    return (index,code_str,name,success_count,failed_count)
     
 def checkAll():
     all_stock = pd.read_csv('all.csv')
     all_stock['macd_success'] = pd.Series()
     all_stock['macd_fail'] = pd.Series()
-    for index,row in all_stock.iterrows():
-        code = row['code']
-        name = row['name']
-        code_str = str(code).zfill(6)
-#        print code_str, '=', name
-        success_count,failed_count = check_stock(code_str, name)
+
+    pool = Pool(THREAD_POOL_SIZE)
+    results = pool.map(checkStockInThread, all_stock.iterrows())
+    pool.close()
+    pool.join()
+    
+    for index,code_str,name,success_count,failed_count in results:
+#        print index, success_count, failed_count
         all_stock.loc[index, 'macd_success'] = success_count
         all_stock.loc[index, 'macd_fail'] = failed_count
         if (success_count > failed_count) and (success_count > 5) and (failed_count == 0):
             print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
-
+        
+#
+#
+#    for index,row in all_stock.iterrows():
+#        code = row['code']
+#        name = row['name']
+#        code_str = str(code).zfill(6)
+##        print code_str, '=', name
+#        success_count,failed_count = check_stock(code_str, name)
+#        all_stock.loc[index, 'macd_success'] = success_count
+#        all_stock.loc[index, 'macd_fail'] = failed_count
+#        if (success_count > failed_count) and (success_count > 5) and (failed_count == 0):
+#            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
+#
     all_stock = all_stock.sort_values('macd_success', 0, False)
-    all_stock.to_csv('./output/macd/summy.csv')
+    all_stock.to_csv('./output/macd/summy_DIFF_DEA.csv')
 
 def check_stock_now(code, name):
     operate = 0
