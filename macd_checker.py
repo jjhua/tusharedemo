@@ -49,30 +49,27 @@ def check_stock(code, name):
         df['macd_MACD_SELF'] = pd.Series()
         df['macd_SUM'] = pd.Series()
         df['macd_result'] = pd.Series()
+
+        macd, macdsignal, macdhist = ta.MACD(np.array(df['close']), fastperiod=12, slowperiod=26, signalperiod=9)
+
+        macd_index = df.shape[1]
+        df['macd']=pd.Series(macd,index=df.index) #DIFF
+        macdsignal_index = df.shape[1]
+        df['macdsignal']=pd.Series(macdsignal,index=df.index)#DEA
+        macdhist_index = df.shape[1]
+        df['macdhist']=pd.Series(macdhist,index=df.index)#DIFF-DEA
+
+        SignalMA5 = ta.MA(macdsignal, timeperiod=5, matype=0)
+        SignalMA10 = ta.MA(macdsignal, timeperiod=10, matype=0)
+        SignalMA20 = ta.MA(macdsignal, timeperiod=20, matype=0)
+
+
         for dflen in range(36, df.shape[0] + 1):
             curdf = pd.DataFrame(df[:dflen])
-            macd, macdsignal, macdhist = ta.MACD(np.array(curdf['close']), fastperiod=12, slowperiod=26, signalperiod=9)
-
             operate = 0
             
-            SignalMA5 = ta.MA(macdsignal, timeperiod=5, matype=0)
-            SignalMA10 = ta.MA(macdsignal, timeperiod=10, matype=0)
-            SignalMA20 = ta.MA(macdsignal, timeperiod=20, matype=0)
-            
-            if (dflen == df.shape[0]):
-                df['macd']=pd.Series(macd,index=df.index) #DIFF
-                df['macdsignal']=pd.Series(macdsignal,index=df.index)#DEA
-                df['macdhist']=pd.Series(macdhist,index=df.index)#DIFF-DEA
-
             #在后面增加3列，分别是13-15列，对应的是 DIFF  DEA  DIFF-DEA       
-            macd_index = curdf.shape[1]
-            curdf['macd']=pd.Series(macd,index=curdf.index) #DIFF
-            macdsignal_index = curdf.shape[1]
-            curdf['macdsignal']=pd.Series(macdsignal,index=curdf.index)#DEA
-            macdhist_index = curdf.shape[1]
-            curdf['macdhist']=pd.Series(macdhist,index=curdf.index)#DIFF-DEA
-            MAlen = len(SignalMA5)
-#            print 'macd_index=', macd_index
+            MAlen = dflen
             #2个数组 1.DIFF、DEA均为正，DIFF向上突破DEA，买入信号。 2.DIFF、DEA均为负，DIFF向下跌破DEA，卖出信号。
             #待修改
             if curdf.iat[(dflen-1),macd_index]>0:
@@ -296,5 +293,5 @@ if __name__ == '__main__':
 #    checknow()
     checkAll()
 #    checkSome()
-#    check_stock('600800', 'test')
+#    check_stock('000001', 'test')
     print 'finish'
