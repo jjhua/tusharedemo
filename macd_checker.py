@@ -78,22 +78,22 @@ def check_stock(code, name):
             if curdf.iat[(dflen-1),macd_index]>0:
                 if curdf.iat[(dflen-1),macdsignal_index]>0:
                     if curdf.iat[(dflen-1),macd_index]>curdf.iat[(dflen-1),macdsignal_index] and curdf.iat[(dflen-2),macd_index]<=curdf.iat[(dflen-2),macdsignal_index]:
-                        operate = operate + 10#买入
+#                        operate = operate + 10#买入
                         df['macd_DIFF_DEA'][dflen - 1] = 1
             else:
                 if curdf.iat[(dflen-1),macdsignal_index]<0:
                     if curdf.iat[(dflen-1),macd_index] == curdf.iat[(dflen-2),macdsignal_index]:
-                        operate = operate - 10#卖出
+#                        operate = operate - 10#卖出
                         df['macd_DIFF_DEA'][dflen - 1] = -1
             
             #3.DEA线与K线发生背离，行情反转信号。
             if curdf.iat[(dflen-1),7]>=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]>=curdf.iat[(dflen-1),9]:#K线上涨
                 if SignalMA5[MAlen-1]<=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]<=SignalMA20[MAlen-1]: #DEA下降
-#                    operate = operate - 1
+                    operate = operate - 1
                     df['macd_DEA_K'][dflen - 1] = 1
             elif curdf.iat[(dflen-1),7]<=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]<=curdf.iat[(dflen-1),9]:#K线下降
                 if SignalMA5[MAlen-1]>=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]>=SignalMA20[MAlen-1]: #DEA上涨
-#                    operate = operate + 1
+                    operate = operate + 1
                     df['macd_DEA_K'][dflen - 1] = -1
                        
                
@@ -190,7 +190,7 @@ def checkAll():
 #            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
 #
     all_stock = all_stock.sort_values('macd_success', 0, False)
-    all_stock.to_csv('./output/macd/summy_DIFF_DEA.csv')
+    all_stock.to_csv('./output/macd/summy_DEA_K.csv')
 
 def check_stock_now(code, name):
     operate = 0
