@@ -245,14 +245,14 @@ def check_stock_now(code, name):
         if curdf.iat[(dflen-1),macdhist_index]>0 and dflen >30 :
             for i in range(1,26):
                 if curdf.iat[(dflen-1-i),macdhist_index]<=0:#
-                    operate = operate + 5
+#                    operate = operate + 5
                     df['macd_MACD_SELF'][dflen - 1] = 1
                     break
                 #由正变负，卖出信号   
         if curdf.iat[(dflen-1),macdhist_index]<0 and dflen >30 :
             for i in range(1,26):
                 if curdf.iat[(dflen-1-i),macdhist_index]>=0:#
-                    operate = operate - 5
+#                    operate = operate - 5
                     df['macd_MACD_SELF'][dflen - 1] = -1
                     break
                 
@@ -290,8 +290,8 @@ def checkSome():
         check_stock(code_str, 'test')
 
 if __name__ == '__main__':    
-#    checknow()
-    checkAll()
+    checknow()
+#    checkAll()
 #    checkSome()
 #    check_stock('000001', 'test')
     print 'finish'
