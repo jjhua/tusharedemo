@@ -248,7 +248,7 @@ def check_stock_now(code, name):
                 df['macd_DEA_K'][dflen - 1] = -1
         last_operate = operate
         if operate == 0:
-            for dflen in range(dflen - 1, 36):
+            for dflen in range(36, dflen - 1)[::-1]:
                 if curdf.iat[(dflen-1),7]>=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]>=curdf.iat[(dflen-1),9]:#K线上涨
                     if SignalMA5[MAlen-1]<=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]<=SignalMA20[MAlen-1]: #DEA下降
                         last_operate = -1
@@ -305,6 +305,7 @@ def checknow():
     for index,code_str,name,operate,last_operate,success_count,failed_count in results:
 #        print index, success_count, failed_count
         all_stock.loc[index, 'operate'] = operate
+        all_stock.loc[index, 'last_operate'] = last_operate
         if (operate != 0) or (last_operate != 0):
             all_stock.loc[index, 'macd_success'] = success_count
             all_stock.loc[index, 'macd_fail'] = failed_count
