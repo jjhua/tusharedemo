@@ -23,7 +23,7 @@ from matplotlib.dates import date2num
 
 from multiprocessing import Pool
 
-THREAD_POOL_SIZE = 8
+THREAD_POOL_SIZE = 33
 begin_time = '2010-01-01'
 begin_time_check_now = '2016-01-01'
 
@@ -170,7 +170,7 @@ def checkAll():
 #        print index, success_count, failed_count
         all_stock.loc[index, 'macd_success'] = success_count
         all_stock.loc[index, 'macd_fail'] = failed_count
-        if (success_count > failed_count) and (success_count > 5) and (failed_count == 0):
+        if (success_count > 3) and (failed_count == 0):
             print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
         
 #
@@ -193,7 +193,14 @@ def check_stock_now(code, name):
     operate = 0
         
     
-    df = ts.get_hist_data(code, start=begin_time_check_now)
+    for i in range(0, 1):
+        df = ts.get_hist_data(code, start=begin_time_check_now)
+        if df is not None:
+            break
+        print 'retry ', i, code, name
+    if df is None:
+        return 0
+
     df = df.sort_index(0)
     dflen = df.shape[0]
     if dflen>35:
@@ -260,22 +267,54 @@ def check_stock_now(code, name):
 
     return operate
 
+def checkStockNowInThread((index,row)):
+#    print index
+#    print row
+    code = row['code']
+    name = row['name']
+    code_str = str(code).zfill(6)
+#    print code_str, '=', name
+    operate = check_stock_now(code_str, name)
+    success_count = 0
+    failed_count = 0
+    if operate != 0:
+        success_count,failed_count = check_stock(code_str, name)
+
+    return (index,code_str,name,operate,success_count,failed_count)
+
 def checknow():
     all_stock = pd.read_csv('all.csv')
-    for index,row in all_stock.iterrows():
-        code = row['code']
-        name = row['name']
-        code_str = str(code).zfill(6)
-#        print code_str, '=', name
-        operate = check_stock_now(code_str, name)
+
+    pool = Pool(THREAD_POOL_SIZE)
+    results = pool.map(checkStockNowInThread, all_stock.iterrows())
+    pool.close()
+    pool.join()
+
+    for index,code_str,name,operate,success_count,failed_count in results:
+#        print index, success_count, failed_count
         all_stock.loc[index, 'operate'] = operate
         if operate != 0:
-            success_count,failed_count = check_stock(code_str, name)
             all_stock.loc[index, 'macd_success'] = success_count
             all_stock.loc[index, 'macd_fail'] = failed_count
-            if (success_count >= 4):
+            if (success_count > 3) and (failed_count == 0):
                 print code_str, name, '  operate=', operate,
                 print '  success_count=', success_count,'  failed_count=', failed_count
+
+
+#    for index,row in all_stock.iterrows():
+#        code = row['code']
+#        name = row['name']
+#        code_str = str(code).zfill(6)
+##        print code_str, '=', name
+#        operate = check_stock_now(code_str, name)
+#        all_stock.loc[index, 'operate'] = operate
+#        if operate != 0:
+#            success_count,failed_count = check_stock(code_str, name)
+#            all_stock.loc[index, 'macd_success'] = success_count
+#            all_stock.loc[index, 'macd_fail'] = failed_count
+#            if (success_count >= 4):
+#                print code_str, name, '  operate=', operate,
+#                print '  success_count=', success_count,'  failed_count=', failed_count
             
     macddata = all_stock[all_stock.operate != 0].sort_values('macd_success', 0, False)
     macddata.to_csv('./output/macd/day/' + datetime.date.today().strftime('%Y-%m-%d') + '.csv')
@@ -290,8 +329,8 @@ def checkSome():
         check_stock(code_str, 'test')
 
 if __name__ == '__main__':    
-    checknow()
-#    checkAll()
+#    checknow()
+    checkAll()
 #    checkSome()
 #    check_stock('000001', 'test')
     print 'finish'
