@@ -34,9 +34,6 @@ begin_time_check_now = '2016-01-01'
 
 def check_stock(code, name):
 #    print name
-    success_count = 0
-    failed_count = 0
-    
     for i in range(0, 10):
         df = ts.get_hist_data(code, start=begin_time)
         if df is not None:
@@ -44,7 +41,14 @@ def check_stock(code, name):
         print 'retry ', i, code, name
     if df is None:
         return (0, 0)
+
     df = df.sort_index(0)
+    return check_stock_data(code, name, df)
+
+def check_stock_data(code, name, df):
+    success_count = 0
+    failed_count = 0
+
     dflen = df.shape[0]
     if dflen>35:
         last_operator_price_close = 0
