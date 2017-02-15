@@ -23,6 +23,11 @@ from matplotlib.dates import date2num
 
 from multiprocessing import Pool
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+
 THREAD_POOL_SIZE = 33
 begin_time = '2010-01-01'
 begin_time_check_now = '2016-01-01'
@@ -202,6 +207,7 @@ def check_stock_now(code, name):
         return (0,0)
 
     df = df.sort_index(0)
+    print df.shape
     dflen = df.shape[0]
     if dflen>35:
         df['macd_DIFF_DEA'] = pd.Series()
@@ -223,6 +229,7 @@ def check_stock_now(code, name):
         macdhist_index = df.shape[1]
         curdf['macdhist']=pd.Series(macdhist,index=curdf.index)#DIFF-DEA
         MAlen = len(SignalMA5)
+        
         
 #        #2个数组 1.DIFF、DEA均为正，DIFF向上突破DEA，买入信号。 2.DIFF、DEA均为负，DIFF向下跌破DEA，卖出信号。
 #        #待修改
@@ -246,15 +253,18 @@ def check_stock_now(code, name):
             if SignalMA5[MAlen-1]>=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]>=SignalMA20[MAlen-1]: #DEA上涨
                 operate = operate + 1
                 df['macd_DEA_K'][dflen - 1] = -1
+        
         last_operate = operate
         if operate == 0:
+            print code, '=', name, 'operate=0'
             for dflen in range(36, dflen - 1)[::-1]:
+                print dflen
                 if curdf.iat[(dflen-1),7]>=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]>=curdf.iat[(dflen-1),9]:#K线上涨
-                    if SignalMA5[MAlen-1]<=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]<=SignalMA20[MAlen-1]: #DEA下降
+                    if SignalMA5[dflen-1]<=SignalMA10[dflen-1] and SignalMA10[dflen-1]<=SignalMA20[dflen-1]: #DEA下降
                         last_operate = -1
                         df['macd_DEA_K'][dflen - 1] = 1
                 elif curdf.iat[(dflen-1),7]<=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]<=curdf.iat[(dflen-1),9]:#K线下降
-                    if SignalMA5[MAlen-1]>=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]>=SignalMA20[MAlen-1]: #DEA上涨
+                    if SignalMA5[dflen-1]>=SignalMA10[dflen-1] and SignalMA10[dflen-1]>=SignalMA20[dflen-1]: #DEA上涨
                         last_operate = 1
                         df['macd_DEA_K'][dflen - 1] = -1
                 if last_operate != 0:
@@ -289,7 +299,7 @@ def checkStockNowInThread((index,row)):
     operate, last_operate = check_stock_now(code_str, name)
     success_count = 0
     failed_count = 0
-    if operate != 0:
+    if (operate != 0):
         success_count,failed_count = check_stock(code_str, name)
 
     return (index,code_str,name,operate,last_operate,success_count,failed_count)
@@ -306,7 +316,7 @@ def checknow():
 #        print index, success_count, failed_count
         all_stock.loc[index, 'operate'] = operate
         all_stock.loc[index, 'last_operate'] = last_operate
-        if (operate != 0) or (last_operate != 0):
+        if (last_operate != 0):
             all_stock.loc[index, 'macd_success'] = success_count
             all_stock.loc[index, 'macd_fail'] = failed_count
             if (success_count > 3) and (failed_count == 0):
@@ -329,7 +339,7 @@ def checknow():
 #                print code_str, name, '  operate=', operate,
 #                print '  success_count=', success_count,'  failed_count=', failed_count
             
-    macddata = all_stock[all_stock.operate != 0].sort_values('macd_success', 0, False)
+    macddata = all_stock[all_stock.last_operate != 0].sort_values('macd_success', 0, False)
     macddata.to_csv('./output/macd/day/' + datetime.date.today().strftime('%Y-%m-%d') + '.csv')
 
 def checkSome():
@@ -346,4 +356,5 @@ if __name__ == '__main__':
 #    checkAll()
 #    checkSome()
 #    check_stock('000001', 'test')
+#    print check_stock_now('002510','test')
     print 'finish'
