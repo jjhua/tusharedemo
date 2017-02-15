@@ -23,12 +23,15 @@ from matplotlib.dates import date2num
 
 from multiprocessing import Pool
 
+from algrothm import calcMACD
+from base import getAllStock
+
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-THREAD_POOL_SIZE = 33
+THREAD_POOL_SIZE = 6
 begin_time = '2010-01-01'
 begin_time_check_now = '2016-01-01'
 
@@ -160,13 +163,13 @@ def checkStockInThread((index,row)):
     code = row['code']
     name = row['name']
     code_str = str(code).zfill(6)
-#    print code_str, '=', name
-    success_count,failed_count = check_stock(code_str, name)
+    print code_str, '=', name.encode('gbk')
+    success_count,failed_count = calcMACD(code_str)
     
     return (index,code_str,name,success_count,failed_count)
     
 def checkAll():
-    all_stock = pd.read_csv('all.csv')
+    all_stock = getAllStock()
     all_stock['macd_success'] = pd.Series()
     all_stock['macd_fail'] = pd.Series()
 
@@ -180,7 +183,7 @@ def checkAll():
         all_stock.loc[index, 'macd_success'] = success_count
         all_stock.loc[index, 'macd_fail'] = failed_count
         if (success_count > 3) and (failed_count == 0):
-            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
+            print code_str, name.encode('gbk'), '  success_count=', success_count,'  failed_count=', failed_count
         
 #
 #
@@ -196,7 +199,7 @@ def checkAll():
 #            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
 #
     all_stock = all_stock.sort_values('macd_success', 0, False)
-    all_stock.to_csv('./output/macd/summy_DEA_K.csv')
+    all_stock.to_csv('./output/macd2/summy_DEA_K.csv')
 
 def check_stock_now(code, name):
     operate = 0
@@ -356,8 +359,8 @@ def checkSome():
         check_stock(code_str, 'test')
 
 if __name__ == '__main__':    
-    checknow()
-#    checkAll()
+#    checknow()
+    checkAll()
 #    checkSome()
 #    check_stock('000001', 'test')
 #    print check_stock_now('002510','test')
