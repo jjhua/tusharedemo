@@ -26,17 +26,21 @@ def calcStockByMonth(code, yearmonthdf):
     results = None
     yearmonthdf['asc_days_more'] = yearmonthdf['asc_days'] - yearmonthdf['desc_days']
     yearmonthdf['desc_days_more'] = yearmonthdf['desc_days'] - yearmonthdf['asc_days']
+    yearmonthdf['asc_price_more'] = yearmonthdf['close_last'] - yearmonthdf['close_first']
+    yearmonthdf['desc_price_more'] = yearmonthdf['close_first'] - yearmonthdf['close_last']
 #    asc_days_more = yearmonthdf[yearmonthdf.asc_days > yearmonthdf.desc_days]
     results = yearmonthdf.groupby(by='month').agg({
                                                 'asc_days_more':lambda g: g[g > 0].count(),
                                                 'desc_days_more':lambda g: g[g > 0].count(),
+                                                'asc_price_more':lambda g: g[g > 0].count(),
+                                                'desc_price_more':lambda g: g[g > 0].count(),
                                                 })
     return results
 
 def checkStock(code_str):
     month_file_path = MONTH_DIR + code_str + '.csv'
-    if os.path.exists(month_file_path):
-        return
+#    if os.path.exists(month_file_path):
+#        return
 
     file_path = YEAR_MONTH_DIR + code_str + '.csv'
     if os.path.exists(file_path):
@@ -49,6 +53,31 @@ def checkStock(code_str):
     results = calcStockByMonth(code_str, results)
     if results is not None:
         results.to_csv(month_file_path)
+
+def makeSummy():
+    all_stock = getAllStock()
+    for (index,row) in all_stock.iterrows():
+        code = row['code']
+#        name = row['name']
+        code_str = str(code).zfill(6)
+
+#        print code_str
+
+        month_file_path = MONTH_DIR + code_str + '.csv'
+        if not os.path.exists(month_file_path):
+            continue
+        month_data = pd.read_csv(month_file_path)
+        if month_data is None:
+            continue
+        if month_data.shape[0] < 12:
+            continue
+        for index_month,row_month in month_data.iterrows():
+            all_stock.loc[index, 'asc_day_m' + str(int(row_month['month']))] = (row_month['asc_days_more'] - row_month['desc_days_more']) * 100 / (row_month['asc_days_more'] + row_month['desc_days_more'])
+        for index_month,row_month in month_data.iterrows():
+            all_stock.loc[index, 'asc_price_m' + str(int(row_month['month']))] = (row_month['asc_price_more'] - row_month['desc_price_more']) * 100 / (row_month['asc_price_more'] + row_month['desc_price_more'])
+
+    all_stock[all_stock.asc_day_m1.isnull() == False].to_csv(MONTH_DIR + 'summy.csv')
+
 
 def checkStockInThread((index,row)):
     code = row['code']
@@ -72,6 +101,7 @@ if __name__ == '__main__':
 
 #    checkStock('000001')
     checkAll()
+    makeSummy()
     
     print 'finish'
 
