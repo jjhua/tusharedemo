@@ -140,40 +140,40 @@ def calcMACD(code):
             if curdf.iat[(dflen-1),macdsignal_index]>0:
                 if curdf.iat[(dflen-1),macd_index]>curdf.iat[(dflen-1),macdsignal_index] and curdf.iat[(dflen-2),macd_index]<=curdf.iat[(dflen-2),macdsignal_index]:
 #                        operate = operate + 10#买入
-                    df['macd_DIFF_DEA'][dflen - 1] = 1
+                    df.loc['macd_DIFF_DEA', dflen - 1] = 1
         else:
             if curdf.iat[(dflen-1),macdsignal_index]<0:
                 if curdf.iat[(dflen-1),macd_index] == curdf.iat[(dflen-2),macdsignal_index]:
 #                        operate = operate - 10#卖出
-                    df['macd_DIFF_DEA'][dflen - 1] = -1
+                    df.loc['macd_DIFF_DEA', dflen - 1] = -1
 
         #3.DEA线与K线发生背离，行情反转信号。
         if curdf.iat[(dflen-1),MA5_index]>=curdf.iat[(dflen-1),MA10_index] and curdf.iat[(dflen-1),MA10_index]>=curdf.iat[(dflen-1),MA20_index]:#K线上涨
             if SignalMA5[MAlen-1]<=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]<=SignalMA20[MAlen-1]: #DEA下降
                 operate = operate - 1
-                df['macd_DEA_K'][dflen - 1] = 1
+                df.loc['macd_DEA_K', dflen - 1] = 1
         elif curdf.iat[(dflen-1),MA5_index]<=curdf.iat[(dflen-1),MA10_index] and curdf.iat[(dflen-1),MA10_index]<=curdf.iat[(dflen-1),MA20_index]:#K线下降
             if SignalMA5[MAlen-1]>=SignalMA10[MAlen-1] and SignalMA10[MAlen-1]>=SignalMA20[MAlen-1]: #DEA上涨
                 operate = operate + 1
-                df['macd_DEA_K'][dflen - 1] = -1
+                df.loc['macd_DEA_K', dflen - 1] = -1
 
         #4.分析MACD柱状线，由负变正，买入信号。
         if curdf.iat[(dflen-1),macdhist_index]>0 and dflen >30 :
             for i in range(1,26):
                 if curdf.iat[(dflen-1-i),macdhist_index]<=0:#
 #                        operate = operate + 5
-                    df['macd_MACD_SELF'][dflen - 1] = 1
+                    df.loc['macd_MACD_SELF', dflen - 1] = 1
                     break
                 #由正变负，卖出信号   
         if curdf.iat[(dflen-1),macdhist_index]<0 and dflen >30 :
             for i in range(1,26):
                 if curdf.iat[(dflen-1-i),macdhist_index]>=0:#
 #                        operate = operate - 5
-                    df['macd_MACD_SELF'][dflen - 1] = -1
+                    df.loc['macd_MACD_SELF', dflen - 1] = -1
                     break
 
         if operate != 0:
-            df['macd_SUM'][dflen - 1] = operate
+            df.loc['macd_SUM', dflen - 1] = operate
 
         if operate == 0:
             continue
@@ -194,10 +194,10 @@ def calcMACD(code):
             if last_operator_price_close != 0:
                 if cur_operator_price_close > last_operator_price_close:
                     success_count += 1
-                    df['macd_result'][dflen - 1] = 1
+                    df.loc['macd_result', dflen - 1] = 1
                 else:
                     failed_count += 1
-                    df['macd_result'][dflen - 1] = -1
+                    df.loc['macd_result', dflen - 1] = -1
 
         last_operator = operate
         last_operator_price_close = cur_operator_price_close
@@ -214,6 +214,6 @@ if __name__ == '__main__':
 
 #    checkAll()
 
-    calcMACD('000001')
+    calcMACD('603131')
 
     print 'finish'
