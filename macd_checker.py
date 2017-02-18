@@ -28,6 +28,9 @@ from algrothm import calcMACD
 from base import getAllStock
 
 import sys
+import traceback
+
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -165,10 +168,58 @@ def checkStockInThread((index,row)):
     name = row['name']
     code_str = str(code).zfill(6)
     print code_str, '=', name.encode('gbk')
-    success_count,failed_count = calcMACD(code_str)
+    success_count = 0
+    failed_count = 0
+    try:
+        success_count,failed_count = calcMACD(code_str)
+    except Exception, e:
+        print code_str, '=', name.encode('gbk'),
+        print e
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print "*** print sys.exc_info:"
+        print 'exc_type is: %s, exc_value is: %s, exc_traceback is: %s' % (exc_type, exc_value, exc_traceback)
+        print "-" *  100
     
+        print "*** print_tb:"
+        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+        print "-" *  100
+    
+        print "*** print_exception:"
+        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+        print "-" *  100
+    
+        print "*** print_exc:"
+        traceback.print_exc()
+        print "-" *  100
+    
+        print "*** format_exc, first and last line:"
+        formatted_lines = traceback.format_exc().splitlines()
+        print formatted_lines[0]
+        print formatted_lines[-1]
+        print "-" *  100
+    
+        print "*** format_exception:"
+        print repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        print "-" *  100
+    
+        print "*** extract_tb:"
+        print repr(traceback.extract_tb(exc_traceback))
+        print "-" *  100
+    
+        print "*** extract_stack:"
+        print traceback.extract_stack()
+        print "-" *  100
+    
+        print "*** format_tb:"
+        print repr(traceback.format_tb(exc_traceback))
+        print "-" *  100
+    
+        print "*** tb_lineno:", exc_traceback.tb_lineno
+
+        print traceback.format_list([('spam.py', 3, '<module>', 'spam.eggs()'), ('eggs.py', 42, 'eggs', 'return "bacon"')])
+
     return (index,code_str,name,success_count,failed_count)
-    
+
 def checkAll():
     output_dir = './output/macd2/'
     if not os.path.exists(output_dir):
@@ -189,19 +240,19 @@ def checkAll():
         if (success_count > 3) and (failed_count == 0):
             print code_str, name.encode('gbk'), '  success_count=', success_count,'  failed_count=', failed_count
         
-#
-#
+
+
 #    for index,row in all_stock.iterrows():
 #        code = row['code']
 #        name = row['name']
 #        code_str = str(code).zfill(6)
-##        print code_str, '=', name
-#        success_count,failed_count = check_stock(code_str, name)
+#        print code_str, '=', name.encode('gbk')
+#        success_count,failed_count = calcMACD(code_str)
 #        all_stock.loc[index, 'macd_success'] = success_count
 #        all_stock.loc[index, 'macd_fail'] = failed_count
 #        if (success_count > failed_count) and (success_count > 5) and (failed_count == 0):
 #            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
-#
+
     all_stock = all_stock.sort_values('macd_success', 0, False)
     all_stock.to_csv('./output/macd2/summy_DEA_K.csv')
 
