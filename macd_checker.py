@@ -25,10 +25,9 @@ from matplotlib.dates import date2num
 from multiprocessing import Pool
 
 from algrothm import calcMACD
-from base import getAllStock
+from base import getAllStock, logException
 
 import sys
-import traceback
 
 
 reload(sys)
@@ -175,48 +174,7 @@ def checkStockInThread((index,row)):
     except Exception, e:
         print code_str, '=', name.encode('gbk'),
         print e
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        print "*** print sys.exc_info:"
-        print 'exc_type is: %s, exc_value is: %s, exc_traceback is: %s' % (exc_type, exc_value, exc_traceback)
-        print "-" *  100
-    
-        print "*** print_tb:"
-        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
-        print "-" *  100
-    
-        print "*** print_exception:"
-        traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
-        print "-" *  100
-    
-        print "*** print_exc:"
-        traceback.print_exc()
-        print "-" *  100
-    
-        print "*** format_exc, first and last line:"
-        formatted_lines = traceback.format_exc().splitlines()
-        print formatted_lines[0]
-        print formatted_lines[-1]
-        print "-" *  100
-    
-        print "*** format_exception:"
-        print repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
-        print "-" *  100
-    
-        print "*** extract_tb:"
-        print repr(traceback.extract_tb(exc_traceback))
-        print "-" *  100
-    
-        print "*** extract_stack:"
-        print traceback.extract_stack()
-        print "-" *  100
-    
-        print "*** format_tb:"
-        print repr(traceback.format_tb(exc_traceback))
-        print "-" *  100
-    
-        print "*** tb_lineno:", exc_traceback.tb_lineno
-
-        print traceback.format_list([('spam.py', 3, '<module>', 'spam.eggs()'), ('eggs.py', 42, 'eggs', 'return "bacon"')])
+        logException()
 
     return (index,code_str,name,success_count,failed_count)
 
