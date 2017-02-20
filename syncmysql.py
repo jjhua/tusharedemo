@@ -35,8 +35,8 @@ def syncStock(code):
         return
 #    print df
     df.to_csv('./output/kdata/' + code + '.csv')
-    engine = create_engine('mysql://root:root@127.0.0.1/tushare?charset=utf8')
-    df.to_sql(code,engine,if_exists='append',dtype=df_type_dic)
+#    engine = create_engine('mysql://root:root@127.0.0.1/tushare?charset=utf8')
+#    df.to_sql(code,engine,if_exists='append',dtype=df_type_dic)
 
 def syncStockInThread((index,row)):
     code = row['code']

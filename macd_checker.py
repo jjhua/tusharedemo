@@ -14,6 +14,7 @@ import time
 import talib as ta
 import numpy as np
 import pandas as pd
+import os
 
 from matplotlib.dates import DateFormatter, WeekdayLocator, DayLocator, MONDAY,YEARLY
 from matplotlib.finance import fetch_historical_yahoo
@@ -169,6 +170,9 @@ def checkStockInThread((index,row)):
     return (index,code_str,name,success_count,failed_count)
     
 def checkAll():
+    output_dir = './output/macd2/'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     all_stock = getAllStock()
     all_stock['macd_success'] = pd.Series()
     all_stock['macd_fail'] = pd.Series()

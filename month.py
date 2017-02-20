@@ -88,6 +88,10 @@ def checkStockInThread((index,row)):
     checkStock(code_str)
 
 def checkAll():
+    if not os.path.exists(MONTH_DIR):
+        os.makedirs(MONTH_DIR)
+    if not os.path.exists(YEAR_MONTH_DIR):
+        os.makedirs(YEAR_MONTH_DIR)
     all_stock = getAllStock()
     pool = Pool(THREAD_POOL_SIZE)
     pool.map(checkStockInThread, all_stock.iterrows())
