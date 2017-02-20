@@ -25,7 +25,7 @@ from matplotlib.dates import date2num
 from multiprocessing import Pool
 
 from algrothm import calcMACD
-from base import getAllStock, logException
+from base import getAllStock, logException, getMacdPath
 
 import sys
 
@@ -163,7 +163,7 @@ def check_stock_data(code, name, df):
 def checkStockInThread((index,row)):
 #    print index
 #    print row
-    code = row['code']
+    code = index
     name = row['name']
     code_str = str(code).zfill(6)
     print code_str, '=', name.encode('gbk')
@@ -195,13 +195,15 @@ def checkAll():
 #        print index, success_count, failed_count
         all_stock.loc[index, 'macd_success'] = success_count
         all_stock.loc[index, 'macd_fail'] = failed_count
+        if success_count != 0:
+            all_stock.loc[index, 'macd_success_percent'] = float(success_count)/(success_count+failed_count) * 100
         if (success_count > 3) and (failed_count == 0):
             print code_str, name.encode('gbk'), '  success_count=', success_count,'  failed_count=', failed_count
         
 
 
 #    for index,row in all_stock.iterrows():
-#        code = row['code']
+#        code = index
 #        name = row['name']
 #        code_str = str(code).zfill(6)
 #        print code_str, '=', name.encode('gbk')
@@ -211,8 +213,9 @@ def checkAll():
 #        if (success_count > failed_count) and (success_count > 5) and (failed_count == 0):
 #            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
 
-    all_stock = all_stock.sort_values('macd_success', 0, False)
-    all_stock.to_csv('./output/macd2/summy_DEA_K.csv')
+    all_stock.to_csv(getMacdPath('summy_all'))
+    all_stock = all_stock[all_stock.macd_success >= 5][all_stock.macd_success_percent >= 80].sort_values('macd_success', 0, False)
+    all_stock.to_csv(getMacdPath('summy_DEA_K'))
 
 def check_stock_now(code, name):
     operate = 0
@@ -312,7 +315,7 @@ def check_stock_now(code, name):
 def checkStockNowInThread((index,row)):
 #    print index
 #    print row
-    code = row['code']
+    code = index
     name = row['name']
     code_str = str(code).zfill(6)
 #    print code_str, '=', name
@@ -325,7 +328,7 @@ def checkStockNowInThread((index,row)):
     return (index,code_str,name,operate,last_operate,success_count,failed_count)
 
 def checknow():
-    all_stock = pd.read_csv('all.csv')
+    all_stock = getAllStock()
 
     pool = Pool(THREAD_POOL_SIZE)
     results = pool.map(checkStockNowInThread, all_stock.iterrows())
@@ -345,7 +348,7 @@ def checknow():
 
 
 #    for index,row in all_stock.iterrows():
-#        code = row['code']
+#        code = index
 #        name = row['name']
 #        code_str = str(code).zfill(6)
 ##        print code_str, '=', name

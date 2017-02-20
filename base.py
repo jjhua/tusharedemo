@@ -7,18 +7,26 @@ Created on Wed Feb 15 12:34:11 2017
 
 import pandas as pd
 import traceback
+import sys
 
 OUTPUT_DIR = './output/'
 STOCK_DATA_DIR = OUTPUT_DIR + 'kdata/'
 
 def getOneStockData(code):
-    df = pd.read_csv(STOCK_DATA_DIR + code + '.csv')
+    df = pd.read_csv(STOCK_DATA_DIR + code + '.csv', index_col=0)
     return df
 
 
 def getAllStock():    
-    all_stock = pd.read_csv('all.csv')
+    all_stock = pd.read_csv('all.csv', index_col=0)
     return all_stock
+
+def getVolumePricePath(code):
+    return OUTPUT_DIR + 'volume/' + code + '.csv'
+
+def getMacdPath(code):
+    return OUTPUT_DIR + 'macd_6_26_8_3_6_20/' + code + '.csv'
+
 
 def logException():
     exc_type, exc_value, exc_traceback = sys.exc_info()

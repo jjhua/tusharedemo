@@ -90,11 +90,11 @@ def calcMACD(code):
     success_count = 0
     failed_count = 0
 
-    output_path = OUTPUT_DIR + 'macd2/' + code + '.csv'
+    output_path = getMacdPath(code)
     last_operator_price_close = 0
     last_operator = 0
     if os.path.exists(output_path):
-        df = pd.read_csv(output_path)
+        df = pd.read_csv(output_path, index_col=0)
 
         success_count = df.macd_result[df.macd_result>0].count()
         failed_count = df.macd_result[df.macd_result<0].count()
@@ -229,29 +229,94 @@ def makePicVolumePrice(code, df):
 
 def markVolumePrice(code):
     df = None
-    output_path = OUTPUT_DIR + 'volume/' + code + '.csv'
+    output_path = getVolumePricePath(code)
     if os.path.exists(output_path):
-        df = pd.read_csv(output_path)
+        df = pd.read_csv(output_path, index_col=0)
     else:
         df = base.getOneStockData(code)
-    
+
         if df.empty:
             return
-    
+
         if df.shape[0] < 100:
             return
-        
+
         df['close_diff'] = df.close.pct_change()
         for index,row in df[df.close_diff < 0].iterrows():
             df.loc[index,'close_diff'] = row['close_diff'] / (1+row['close_diff'])
         df['close_diff_abs'] = abs(df.close_diff)
+        df['volume_change'] = df.volume.diff()
         df['volume_diff'] = df.volume.pct_change()
         for index,row in df[df.volume_diff < 0].iterrows():
             df.loc[index,'volume_diff'] = row['volume_diff'] / (1+row['volume_diff'])
         df['volume_diff_abs'] = abs(df.volume_diff)
-    
+
         df.to_csv(output_path)
 #    makePicVolumePrice(code, df)
+
+def calcVolumePrice(code):
+    success_count = 0
+    failed_count = 0
+
+    output_path = getVolumePricePath(code)
+    if not os.path.exists(output_path):
+        markVolumePrice(code)
+
+    if not os.path.exists(output_path):
+        return (success_count,failed_count)
+
+    df = pd.read_csv(output_path, index_col=0)
+    if df.empty:
+        return (success_count,failed_count)
+
+    if df.shape[0] < 100:
+        return (success_count,failed_count)
+
+    df = pd.read_csv(output_path, index_col=0)
+    try:
+        keys = df.keys()
+        keys.get_loc('result')
+        success_count = df.result[df.result>0].count()
+        failed_count = df.result[df.result<0].count()
+        return (success_count,failed_count)
+    except:
+        pass
+
+    buy_price = 0
+    means = df.mean()
+    for index,row in df[df.volume_diff_abs > 1][abs(df.volume_change) > means.volume].iterrows():
+#        print index, row.date,
+#        print 'volume_diff=', row.volume_diff,
+#        print 'close=', row.close,
+#        print 'close_diff=', row.close_diff,
+        operate = 0
+        if row.volume_diff > 0:
+            if row.close_diff > 0:
+                operate = 1
+            else:
+                operate = -1
+        else:
+            if row.close_diff < 0:
+                operate = 1
+            else:
+                operate = -1
+        df.loc[index, 'operate'] = operate
+        if (operate == 1):
+            if buy_price == 0:
+                buy_price = row.close
+        else:
+            if buy_price != 0:
+                if row.close > buy_price:
+                    df.loc[index, 'result'] = 1
+                    success_count += 1
+                else:
+                    df.loc[index, 'result'] = -1
+                    failed_count += 1
+                buy_price = 0
+
+    df.to_csv(output_path)
+    return (success_count,failed_count)
+
 
 if __name__ == '__main__':
 
@@ -261,6 +326,6 @@ if __name__ == '__main__':
 
 #    checkAll()
 
-    markVolumePrice('000038')
+    calcVolumePrice('600583')
 
     print 'finish'
