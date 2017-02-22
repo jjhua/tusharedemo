@@ -25,16 +25,16 @@ from matplotlib.dates import date2num
 from multiprocessing import Pool
 
 from algrothm import calcMACD
-from base import getAllStock, logException, getMacdPath
+from base import getAllStock, logException, getMacdPath, getMacdDir
 
 import sys
 
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 
 
-THREAD_POOL_SIZE = 6
+THREAD_POOL_SIZE = 2
 begin_time = '2010-01-01'
 begin_time_check_now = '2016-01-01'
 
@@ -166,20 +166,20 @@ def checkStockInThread((index,row)):
     code = index
     name = row['name']
     code_str = str(code).zfill(6)
-    print code_str, '=', name.encode('gbk')
+    print code_str, '=', name
     success_count = 0
     failed_count = 0
     try:
         success_count,failed_count = calcMACD(code_str)
     except Exception, e:
-        print code_str, '=', name.encode('gbk'),
+        print code_str, '=', name
         print e
         logException()
 
     return (index,code_str,name,success_count,failed_count)
 
 def checkAll():
-    output_dir = './output/macd2/'
+    output_dir = getMacdDir()
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     all_stock = getAllStock()
@@ -198,7 +198,7 @@ def checkAll():
         if success_count != 0:
             all_stock.loc[index, 'macd_success_percent'] = float(success_count)/(success_count+failed_count) * 100
         if (success_count > 3) and (failed_count == 0):
-            print code_str, name.encode('gbk'), '  success_count=', success_count,'  failed_count=', failed_count
+            print code_str, name, '  success_count=', success_count,'  failed_count=', failed_count
         
 
 
@@ -230,7 +230,7 @@ def check_stock_now(code, name):
         return (0,0)
 
     df = df.sort_index(0)
-    print df.shape
+#    print df.shape
     dflen = df.shape[0]
     if dflen>35:
         df['macd_DIFF_DEA'] = pd.Series()
@@ -279,9 +279,9 @@ def check_stock_now(code, name):
         
         last_operate = operate
         if operate == 0:
-            print code, '=', name, 'operate=0'
+#            print code, '=', name, 'operate=0'
             for dflen in range(36, dflen - 1)[::-1]:
-                print dflen
+#                print dflen
                 if curdf.iat[(dflen-1),7]>=curdf.iat[(dflen-1),8] and curdf.iat[(dflen-1),8]>=curdf.iat[(dflen-1),9]:#K线上涨
                     if SignalMA5[dflen-1]<=SignalMA10[dflen-1] and SignalMA10[dflen-1]<=SignalMA20[dflen-1]: #DEA下降
                         last_operate = -1

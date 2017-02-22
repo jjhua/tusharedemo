@@ -12,6 +12,30 @@ import sys
 OUTPUT_DIR = './output/'
 STOCK_DATA_DIR = OUTPUT_DIR + 'kdata/'
 
+MACD_FASTPERIOD=12
+MACD_SLOWPERIOD=26
+MACD_SIGNALPERIOD=9
+
+MA_FAST = 5
+MA_MIDDLE = 10
+MA_SLOW = 20
+
+class UnicodeStreamFilter:  
+    def __init__(self, target):  
+        self.target = target  
+        self.encoding = 'utf-8'  
+        self.errors = 'replace'  
+        self.encode_to = self.target.encoding  
+    def write(self, s):  
+        if type(s) == str:  
+            s = s.decode("utf-8")  
+        s = s.encode(self.encode_to, self.errors).decode(self.encode_to)  
+        self.target.write(s)
+
+if sys.stdout.encoding == 'cp936':  
+    sys.stdout = UnicodeStreamFilter(sys.stdout)
+
+
 def getOneStockData(code):
     df = pd.read_csv(STOCK_DATA_DIR + code + '.csv', index_col=0)
     return df
@@ -24,8 +48,11 @@ def getAllStock():
 def getVolumePricePath(code):
     return OUTPUT_DIR + 'volume/' + code + '.csv'
 
+def getMacdDir():
+    return OUTPUT_DIR + 'macd_' + str(MACD_FASTPERIOD) + '_' + str(MACD_SLOWPERIOD) + '_' + str(MACD_SIGNALPERIOD) + '_' + str(MA_FAST) + '_' + str(MA_MIDDLE) + '_' + str(MA_SLOW) + '/'
+
 def getMacdPath(code):
-    return OUTPUT_DIR + 'macd_6_26_8_3_6_20/' + code + '.csv'
+    return getMacdDir() + code + '.csv'
 
 
 def logException():

@@ -17,13 +17,7 @@ import matplotlib.pyplot as plt
 
 
 
-MACD_FASTPERIOD=12
-MACD_SLOWPERIOD=26
-MACD_SIGNALPERIOD=9
 
-MA_FAST = 5
-MA_MIDDLE = 10
-MA_SLOW = 20
 
 def _calcAscDays(g):
     days = 0
