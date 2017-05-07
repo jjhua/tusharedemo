@@ -23,7 +23,7 @@ Created on Sat May 06 18:35:03 2017
 import base
 
 import matplotlib.pyplot as plt
-
+import pandas as pd
 
 import numpy as np
 from sklearn.linear_model import LinearRegression
@@ -36,13 +36,15 @@ for index,row in df_all[df_all.volume_diff < 0].iterrows():
 df_all['close_diff'] = df_all.close.pct_change() * 100
 df_all = df_all.dropna(subset=['volume_diff','close_diff'])
 df_all = df_all[df_all.close_diff < 11]
+df_all = df_all[df_all.close_diff > -11]
+df_all = df_all[abs(df_all.volume_diff) > 1]
 dfx = df_all[['volume_diff']]
 dfy = df_all[['close_diff']]
 #X_train = [[6], [8], [10], [14], [18]]
 #y_train = [[7], [9], [13], [17.5], [18]]
 #X_test = [[6], [8], [11], [16]]
 #y_test = [[8], [12], [15], [18]]
-#print df.shape
+print df_all.shape
 count = dfx.shape[0] / 2 - 3
 X_train = dfx[:count]
 y_train = dfy[1:count+1]
@@ -66,12 +68,14 @@ def runplt():
 
 
 runplt()
-#plt.plot(X_train, y_train, 'k.')
+plt.plot(X_train, y_train, 'k.')
 
 # 建立线性回归，并用训练的模型绘图
 regressor = LinearRegression()
 regressor.fit(X_train, y_train)
-yy = regressor.predict(y_train)
+yy = regressor.predict(X_test)
+#df_all['LR1'] = pd.Series()
+#df_all['LR1'][count+1:count+count+1] = yy
 plt.plot(y_train, yy, 'y-')
 
 quadratic_featurizer = PolynomialFeatures(degree=2)
@@ -100,7 +104,7 @@ xx_seventh = seventh_featurizer.transform(X_test)
 plt.plot(X_test, regressor_seventh.predict(xx_seventh), 'b')
 
 
-#plt.plot(X_test, y_test, 'm+')
+plt.plot(X_test, y_test, 'm+')
 
 
 plt.show()
@@ -108,6 +112,7 @@ plt.show()
 #print(X_test_cubic)
 #print(X_train_seventh)
 #print(X_test_seventh)
+print('1 r-liner', regressor.score(X_test, y_test))
 print('2 r-squared', regressor_quadratic.score(X_test_quadratic, y_test))
 print('3 r-squared', regressor_cubic.score(X_test_cubic, y_test))
 print('7 r-squared', regressor_seventh.score(X_test_seventh, y_test))
