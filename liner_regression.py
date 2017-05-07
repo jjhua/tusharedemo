@@ -29,35 +29,44 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
-df_all = base.getOneStockData('000001')
-df = df_all[['close']]
+df_all = base.getOneStockData('000002')
+df_all['volume_diff'] = df_all.volume.pct_change()
+for index,row in df_all[df_all.volume_diff < 0].iterrows():
+    df_all.loc[index,'volume_diff'] = row['volume_diff'] / (1+row['volume_diff'])
+df_all['close_diff'] = df_all.close.pct_change() * 100
+df_all = df_all.dropna(subset=['volume_diff','close_diff'])
+df_all = df_all[df_all.close_diff < 11]
+dfx = df_all[['volume_diff']]
+dfy = df_all[['close_diff']]
 #X_train = [[6], [8], [10], [14], [18]]
 #y_train = [[7], [9], [13], [17.5], [18]]
 #X_test = [[6], [8], [11], [16]]
 #y_test = [[8], [12], [15], [18]]
 #print df.shape
-count = df.shape[0] / 2 - 3
-X_train = df[:count]
-y_train = df[1:count+1]
-X_test = df[count:count+count]
-y_test = df[count+1:count+count+1]
+count = dfx.shape[0] / 2 - 3
+X_train = dfx[:count]
+y_train = dfy[1:count+1]
+X_test = dfx[count:count+count]
+y_test = dfy[count+1:count+count+1]
 
 def runplt():
     x_max = max(X_test.max()[0], X_test.max()[0])
     y_max = max(y_test.max()[0], y_train.max()[0])
+    x_min = min(X_test.min()[0], X_test.min()[0])
+    y_min = min(y_test.min()[0], y_train.min()[0])
 
     plt.figure()
     plt.title(u'diameter-cost curver')
     plt.xlabel(u'diameter')
     plt.ylabel(u'cost')
-    plt.axis([0, x_max.max(), 0, y_max.max()])
+    plt.axis([x_min, x_max, y_min, y_max])
     plt.grid(True)
     return plt
     
 
 
 runplt()
-plt.plot(X_train, y_train, 'k.')
+#plt.plot(X_train, y_train, 'k.')
 
 # 建立线性回归，并用训练的模型绘图
 regressor = LinearRegression()
@@ -91,7 +100,7 @@ xx_seventh = seventh_featurizer.transform(X_test)
 plt.plot(X_test, regressor_seventh.predict(xx_seventh), 'b')
 
 
-plt.plot(X_test, y_test, 'm+')
+#plt.plot(X_test, y_test, 'm+')
 
 
 plt.show()
