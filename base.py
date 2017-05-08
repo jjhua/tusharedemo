@@ -37,7 +37,7 @@ if sys.stdout.encoding == 'cp936':
 
 
 def getOneStockData(code):
-    df = pd.read_csv(STOCK_DATA_DIR + code + '.csv', index_col=0)
+    df = pd.read_csv(STOCK_DATA_DIR + code + '.csv', index_col=0, infer_datetime_format=True, parse_dates=[1])
     return df
 
 

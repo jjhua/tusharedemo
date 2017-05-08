@@ -322,7 +322,7 @@ def checkStockNowInThread((index,row)):
     operate, last_operate = check_stock_now(code_str, name)
     success_count = 0
     failed_count = 0
-    if (operate != 0):
+    if (last_operate != 0):
         success_count,failed_count = check_stock(code_str, name)
 
     return (index,code_str,name,operate,last_operate,success_count,failed_count)
@@ -339,7 +339,8 @@ def checknow():
 #        print index, success_count, failed_count
         all_stock.loc[index, 'operate'] = operate
         all_stock.loc[index, 'last_operate'] = last_operate
-        if (last_operate != 0):
+#        if (last_operate != 0):
+        if True:
             all_stock.loc[index, 'macd_success'] = success_count
             all_stock.loc[index, 'macd_fail'] = failed_count
             if (success_count > 3) and (failed_count == 0):
@@ -375,8 +376,8 @@ def checkSome():
         check_stock(code_str, 'test')
 
 if __name__ == '__main__':    
-#    checknow()
-    checkAll()
+    checknow()
+#    checkAll()
 #    checkSome()
 #    check_stock('000001', 'test')
 #    print check_stock_now('002510','test')
