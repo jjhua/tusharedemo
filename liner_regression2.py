@@ -49,12 +49,12 @@ dfy = df_all[['close']]
 print df_all.shape
 count = dfx.shape[0] / 2
 X_train = dfx[:count].values
-y_train = dfy[1:count+1].values
+y_train = dfy[:count].values
 X_test = dfx[count:count+count].values
-y_test = dfy[count+1:count+count+1].values
+y_test = dfy[count:count+count].values
 
-print X_train
-print y_train
+#print X_train
+#print y_train
 
 def runplt():
 #    x_max = max(X_test.max()[0], X_test.max()[0])
@@ -74,7 +74,7 @@ def runplt():
 
 
 runplt()
-plt.plot(y_test, 'k.')
+plt.plot(y_test, 'k-')
 
 ## 建立线性回归，并用训练的模型绘图
 regressor = LinearRegression()
@@ -84,43 +84,43 @@ yy = regressor.predict(X_test)
 #df_all['LR1'][count+1:count+count+1] = yy
 plt.plot(yy, 'y-')
 
-#quadratic_featurizer = PolynomialFeatures(degree=2)
-#X_train_quadratic = quadratic_featurizer.fit_transform(X_train)
-#X_test_quadratic = quadratic_featurizer.transform(X_test)
-#regressor_quadratic = LinearRegression()
-#regressor_quadratic.fit(X_train_quadratic, y_train)
-#xx_quadratic = quadratic_featurizer.transform(X_test)
-#plt.plot(regressor_quadratic.predict(xx_quadratic), 'r-')
+quadratic_featurizer = PolynomialFeatures(degree=2)
+X_train_quadratic = quadratic_featurizer.fit_transform(X_train)
+X_test_quadratic = quadratic_featurizer.transform(X_test)
+regressor_quadratic = LinearRegression()
+regressor_quadratic.fit(X_train_quadratic, y_train)
+xx_quadratic = quadratic_featurizer.transform(X_test)
+plt.plot(regressor_quadratic.predict(xx_quadratic), 'r-')
 
-#cubic_featurizer = PolynomialFeatures(degree=3)
-#X_train_cubic = cubic_featurizer.fit_transform(X_train)
-#X_test_cubic = cubic_featurizer.transform(X_test)
-#regressor_cubic = LinearRegression()
-#regressor_cubic.fit(X_train_cubic, y_train)
-#xx_cubic = cubic_featurizer.transform(X_test)
-#plt.plot(regressor_cubic.predict(xx_cubic), 'g')
+cubic_featurizer = PolynomialFeatures(degree=3)
+X_train_cubic = cubic_featurizer.fit_transform(X_train)
+X_test_cubic = cubic_featurizer.transform(X_test)
+regressor_cubic = LinearRegression()
+regressor_cubic.fit(X_train_cubic, y_train)
+xx_cubic = cubic_featurizer.transform(X_test)
+plt.plot(regressor_cubic.predict(xx_cubic), 'g')
 
 
-#seventh_featurizer = PolynomialFeatures(degree=7)
-#X_train_seventh = seventh_featurizer.fit_transform(X_train)
-#X_test_seventh = seventh_featurizer.transform(X_test)
-#regressor_seventh = LinearRegression()
-#regressor_seventh.fit(X_train_seventh, y_train)
-#xx_seventh = seventh_featurizer.transform(X_test)
-#plt.plot(regressor_seventh.predict(xx_seventh), 'b')
+seventh_featurizer = PolynomialFeatures(degree=7)
+X_train_seventh = seventh_featurizer.fit_transform(X_train)
+X_test_seventh = seventh_featurizer.transform(X_test)
+regressor_seventh = LinearRegression()
+regressor_seventh.fit(X_train_seventh, y_train)
+xx_seventh = seventh_featurizer.transform(X_test)
+plt.plot(regressor_seventh.predict(xx_seventh), 'b')
 
 
 #plt.plot(X_test, y_test, 'm+')
 
 
-plt.show()
 #print(X_train_cubic)
 #print(X_test_cubic)
 #print(X_train_seventh)
 #print(X_test_seventh)
-#print('1 r-liner', regressor.score(X_test, y_test))
-#print('2 r-squared', regressor_quadratic.score(X_test_quadratic, y_test))
-#print('3 r-squared', regressor_cubic.score(X_test_cubic, y_test))
-#print('7 r-squared', regressor_seventh.score(X_test_seventh, y_test))
+print('1 r-liner', regressor.score(X_test, y_test))
+print('2 r-squared', regressor_quadratic.score(X_test_quadratic, y_test))
+print('3 r-squared', regressor_cubic.score(X_test_cubic, y_test))
+print('7 r-squared', regressor_seventh.score(X_test_seventh, y_test))
 #
 #
+plt.show()
