@@ -96,3 +96,5 @@ output/
 autom4te.cache/
 .libs/
 
+
+.idea/
