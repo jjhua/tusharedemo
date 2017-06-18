@@ -155,9 +155,11 @@ def prepare_data(series, n_test, n_lag, n_seq):
     #    print 'raw_values reshape=', raw_values
     # transform into supervised learning problem X, y
     supervised = series_to_supervised(raw_values, n_lag, n_seq)
-    supervised_values = supervised.values
+    # supervised_values = supervised.values
     # split into train and test sets
-    train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
+    # train, test = supervised_values[0:-n_test], supervised_values[-n_test:]
+    train = supervised.head(0 - n_test)
+    test = supervised.tail(n_test)
     return train, test
 
 
@@ -168,13 +170,28 @@ def persistence(last_ob, n_seq):
 
 # evaluate the persistence model
 def make_forecasts(train, test, n_lag, n_seq):
+    # 建立线性回归，并用训练的模型绘图
+    regressor = LinearRegression()
+    X_train = train[train.columns[:n_lag]]
+    y_train = train[train.columns[n_lag:]]
+    # print X_train
+    # print y_train
+    regressor.fit(X_train, y_train)
+        # break
+
     forecasts = list()
-    for i in range(len(test)):
-        X, y = test[i, 0:n_lag], test[i, n_lag:]
-        # make forecast
-        forecast = persistence(X[-1], n_seq)
-        # store the forecast
-        forecasts.append(forecast)
+#    for i in range(len(test)):
+#        X, y = test[i, 0:n_lag], test[i, n_lag:]
+#        # # make forecast
+#        # forecast = persistence(X[-1], n_seq)
+#        # # store the forecast
+#        # forecasts.append(forecast)
+#        forecast = regressor.predict(X)
+#        print forecast
+#        forecasts.append(forecast)
+#        break
+    testX = test[test.columns[:n_lag]]
+    forecasts = regressor.predict(testX)
     return forecasts
 
 
@@ -195,13 +212,13 @@ def plot_forecasts(series, forecasts, n_test):
 
     pyplot.plot(forecasts, color='r')
 
-    #	for i in range(len(forecasts)):
-    #		off_s = len(series) - n_test + i - 1
-    #		off_e = off_s + len(forecasts[i]) + 1
-    #		xaxis = [x for x in range(off_s, off_e)]
-    #		yaxis = [series.values[off_s]] + forecasts[i]
-    #		pyplot.plot(xaxis, yaxis, color='red')
-    # show the plot
+#	for i in range(len(forecasts)):
+#		off_s = len(series) - n_test + i - 1
+#		off_e = off_s + len(forecasts[i]) + 1
+#		xaxis = [x for x in range(off_s, off_e)]
+#		yaxis = [series.values[off_s]] + forecasts[i]
+#		pyplot.plot(xaxis, yaxis, color='red')
+# show the plot
     pyplot.show()
 
 
@@ -219,9 +236,13 @@ def test2():
     # make forecasts
     forecasts = make_forecasts(train, test, n_lag, n_seq)
     # evaluate forecasts
-    evaluate_forecasts(test, forecasts, n_lag, n_seq)
+    # evaluate_forecasts(test, forecasts, n_lag, n_seq)
     # plot forecasts
     y = series.tail(n_test)
+    # print '------------------'
+    # print y.head(10)
+    # print '-----------------'
+    # print forecasts
     plot_forecasts(y, forecasts, n_test + 2)
 
 
