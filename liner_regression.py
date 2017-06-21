@@ -230,6 +230,7 @@ def test2():
     series = df_all[['close']].dropna()
     #    out = series_to_supervised(df_all[['close','volume']], 3, 1, True)
     #    print out
+#    df['max_close'] = df[['close1','close2','close3']].apply(max, 1)
     train, test = prepare_data(series, n_test, n_lag, n_seq)
     #    print(test)
     print('Train: %s, Test: %s' % (train.shape, test.shape))
